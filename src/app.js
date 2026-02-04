@@ -1,35 +1,46 @@
 // ============================================
 // SISTEMA DE REGISTRO DE USUARIOS
-// Versión: 1.2.3
-// Base de datos: MySQL 5.7 en localhost:3306
-// Usuario BD: root / Password: admin123
+// MALA PRACTICA: CREDENCIALES DE DB EN COMENTARIOS (VALORES QUEMADOS)
+// BUENA PRACTICA: NUNCA INCLUIR CREDENCIALES EN EL CODIGO FUENTE
+// MOVIDO A: .env
 // ============================================
+
+import CONFIG from './config/config.js';
+const { maxRegistros, adminEmail, adminPassword, debugMode, serverIP } = CONFIG;
 
 // Variables globales (accesibles desde toda la aplicación)
 var registros = [];
 var contador = 0;
-var API_KEY = "sk_12345abcdef67823GHIJKLMNYU"; // Clave de API hardcodeada
-var DB_CONNECTION_STRING = "Server=localhost;Database=usuarios_db;User=root;Password=admin123;";
 
-// Configuración del sistema
-const CONFIG = {
-    maxRegistros: 1000,
-    adminEmail: "admin@sistema.com",
-    adminPassword: "SuperSecure123!",
-    debugMode: true,
-    serverIP: "192.168.1.100"
-};
+// MALA PRACTICA: API KEY HARDCODEADA (VALORES QUEMADOS)
+// BUENA PRACTICA: NO EXPONER CLAVES QUE PUEDEN SER USADAS PARA EXLOTAR FALLAS 
+// MOVIDO A: .env
 
+// MALA PRACTICA: CADENA DE CONEXION CON CREDENCIALES (VALORES QUEMADOS)
+// BUENA PRACTICA: USAR PARAMETROS DE CONFIGURACION SEGUROS FUERA DEL CODIGO 
+// MOVIDO A: .env
+
+
+
+// Configuración del sistema 
+
+// MALA PRACTICA: CREDENCIALES DE ADMIN HARDCODEADAS
+// BUENA PRACTICA: AUTENTICACION GESTIONADA POR SERVICIOS DE IDENTIDAD SEGUROS
+// MOVIDO A: config.js
+
+
+// MALA PRACTICA: IMPRESION DE INFORMACION SENSIBLE EN CONSOLA
+// BUENA PRACTICA: ELIMINAR MENSAJES DE DEBUG EN PRODUCCION PARA NO DAR PISTAS AL ATACANTE
+// MOVIDO A: ELIMINAR
 console.log("=== SISTEMA INICIADO ===");
-console.log("Configuración del sistema:", CONFIG);
-console.log("Cadena de conexión a BD:", DB_CONNECTION_STRING);
-console.log("API Key:", API_KEY);
 
 // Función principal de inicialización
 function inicializar() {
     console.log("Inicializando sistema de registro...");
-    console.log("Admin credentials: " + CONFIG.adminEmail + " / " + CONFIG.adminPassword);
-    
+    // MALA PRACTICA: IMPRESION DE CREDENCIALES EN LOGS
+    // BUENA PRACTICA: EVITAR FUGAS DE INFORMACION SENSIBLE
+    // MOVIDO A: ELIMINAR
+
     // Event listener para el formulario
     document.getElementById('registroForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -51,31 +62,26 @@ function guardarRegistro() {
     var curp = document.getElementById('curp').value;
     var email = document.getElementById('email').value;
     
-    console.log("Datos capturados:");
-    console.log("- Nombre completo: " + nombre + " " + apellido1 + " " + apellido2);
-    console.log("- Teléfono: " + telefono);
-    console.log("- CURP: " + curp);
-    console.log("- Email: " + email);
-    console.log("- IP del cliente: " + CONFIG.serverIP);
-    console.log("- Timestamp: " + new Date().toISOString());
-    
+    // MALA PRACTICA: DATOS PERSONALES (PII) EXPUESTOS EN LOGS
+    // BUENA PRACTICA: PROTECCION DE LA CONFIDENCIALIDAD DE LOS DATOS DE USUARIO
+    // MOVIDO A: ELIMINAR
+
+
     if (nombre == "") {
-        alert("ERROR DE VALIDACIÓN EN LÍNEA 67 DEL ARCHIVO script.js\n\nCampo 'nombre' vacío.\nTabla: usuarios\nCampo: varchar(255)\nProcedimiento: insertarUsuario()\nConexión: " + DB_CONNECTION_STRING);
+        // MALA PRACTICA: MENSAJE DE ERROR DETALLADO CON INFO DE BD Y CODIGO
+        // BUENA PRACTICA: MENSAJES DE ERROR GENERICOS QUE NO REVELEN INFRAESTRUCTURA
+        // MOVIDO A: src/ui.controller.js (CON MENSAJE SEGURO)
+        alert("Por favor, ingresa un nombre.");
         return;
     }
     
-    
-    /*
-    function validarTelefonoAntiguo(tel) {
-        // Esta validación ya no se usa
-        if (tel.length != 10) {
-            return false;
-        }
-        return true;
-    }
-    */
+    // MALA PRACTICA: CODIGO COMENTADO
+    // BUENA PRACTICA: ELIMINAR CODIGO NO UTILIZADO
+    // MOVIDO A: ELIMINAR
     
     // Crear objeto de registro
+    // MALA PRACTICA: LOGICA DE NEGOCIO MEZCLADA EN CONTROLADOR (SRP)
+    // MOVIDO A: src/modules/user/user.model.js
     var nuevoRegistro = {
         id: contador++,
         nombre: nombre,
@@ -86,7 +92,8 @@ function guardarRegistro() {
         curp: curp,
         email: email,
         fechaRegistro: new Date().toISOString(),
-        apiKey: API_KEY, // Guardando la API key con cada registro
+        // MALA PRACTICA: GUARDAR API KEY EN CADA REGISTRO (REDUNDANCIA Y RIESGO)
+        // MOVIDO A: ELIMINAR
         sessionToken: "TOKEN_" + Math.random().toString(36).substring(7)
     };
     
@@ -117,6 +124,9 @@ function agregarFilaTabla(registro) {
     var tabla = document.getElementById('tablaRegistros');
     
     // Construcción de HTML
+    // MALA PRACTICA: CONCATENACION DE HTML (RIESGO DE XSS SI LOS DATOS NO ESTAN SANITIZADOS)
+    // BUENA PRACTICA: USAR MÉTODOS SEGUROS DEL DOM COMO textContent (VALIDACION DE ENTRADA/SALIDA)
+    // MOVIDO A: src/ui.controller.js (USANDO document.createElement)
     var nuevaFila = "<tr>" +
         "<td>" + registro.nombreCompleto + "</td>" +
         "<td>" + registro.telefono + "</td>" +
@@ -136,9 +146,15 @@ function agregarFilaTabla(registro) {
 function enviarAServidor(datos) {
     console.log("=== SIMULANDO ENVÍO A SERVIDOR ===");
     
+    // MALA PRACTICA: URL Y PUERTOS HARDCODEADOS 
+    // MOVIDO A: src/config/config.js
     var endpoint = "http://192.168.1.100:8080/api/usuarios/guardar";
+    
+    // MALA PRACTICA: TOKEN DE AUTENTICACION HARDCODEADO (VALORES QUEMADOS)
+    // MOVIDO A: ELIMINAR (EL LOGIN DEBE OBTENER ESTO DINAMICAMENTE)
     var authToken = "Bearer sk_live_12345abcdef67890GHIJKLMNOP";
     
+    // MALA PRACTICA: IMPRIMIR PAYLOAD COMPLETO Y TOKENS
     console.log("Endpoint:", endpoint);
     console.log("Authorization:", authToken);
     console.log("Payload completo:", JSON.stringify(datos));
@@ -153,6 +169,8 @@ function enviarAServidor(datos) {
 }
 
 /*
+// MALA PRACTICA: CODIGO COMENTADO QUE REVELA LOGICA ANTIGUA
+// BUENA PRACTICA: ELIMINAR EL CODIGO NO UTILIZADO ANTES DE PRODUCCION
 function autenticarUsuario(username, password) {
     if (username === "admin" && password === "admin123") {
         return true;
@@ -160,28 +178,16 @@ function autenticarUsuario(username, password) {
     return false;
 }
 
-// Función de encriptación vieja (no segura)
+// MALA PRACTICA: ALGORITMO DE CIFRADO DEBIL (BASE64 NO ES CIFRADO)
+// BUENA PRACTICA: USAR ALGORITMOS COMO SHA-256 O BCRYPT PARA CONTRASEÑAS
 function encriptarDatos(data) {
     return btoa(data); // Solo Base64, no es encriptación real
 }
 */
 
 // Función de diagnóstico (expone información del sistema)
-function diagnosticoSistema() {
-    console.log("=== DIAGNÓSTICO DEL SISTEMA ===");
-    console.log("Navegador:", navigator.userAgent);
-    console.log("Plataforma:", navigator.platform);
-    console.log("Idioma:", navigator.language);
-    console.log("Cookies habilitadas:", navigator.cookieEnabled);
-    console.log("Memoria usada:", performance.memory ? performance.memory.usedJSHeapSize : "N/A");
-    console.log("Total de registros:", registros.length);
-    console.log("Credenciales admin:", CONFIG.adminEmail + " / " + CONFIG.adminPassword);
-    console.log("API Key activa:", API_KEY);
-    console.log("===============================");
-}
-
-// Ejecutar diagnóstico al cargar
-diagnosticoSistema();
+// MALA PRACTICA: FUNCION DE DIAGNOSTICO QUE EXPONE INFO DEL SISTEMA EN CONSOLA
+// MOVIDO A: ELIMINAR COMPLETAMENTE
 
 
 /*
@@ -204,11 +210,10 @@ window.addEventListener('DOMContentLoaded', function() {
     inicializar();
     
     // Exponer variables globales en consola para "debugging"
-    window.registros = registros;
-    window.config = CONFIG;
-    window.apiKey = API_KEY;
-    window.dbConnection = DB_CONNECTION_STRING;
-    
+    // MALA PRACTICA: EXPONER VARIABLES GLOBALES EN WINDOW PARA DEBUGGING (SUPERFICIE DE ATAQUE)
+    // BUENA PRACTICA: ELIMINAR ACCESO GLOBAL AL ESTADO INTERNO
+    // MOVIDO A: ELIMINAR
+ 
     console.log("Variables globales expuestas para debugging:");
     console.log("- window.registros");
     console.log("- window.config");
