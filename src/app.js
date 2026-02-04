@@ -152,7 +152,8 @@ function enviarAServidor(datos) {
     
     // MALA PRACTICA: TOKEN DE AUTENTICACION HARDCODEADO (VALORES QUEMADOS)
     // MOVIDO A: ELIMINAR (EL LOGIN DEBE OBTENER ESTO DINAMICAMENTE)
-    var authToken = "Bearer sk_live_12345abcdef67890GHIJKLMNOP";
+  
+  //  var authToken = "Bearer sk_live_12345abcdef67890GHIJKLMNOP";
     
     // MALA PRACTICA: IMPRIMIR PAYLOAD COMPLETO Y TOKENS
     console.log("Endpoint:", endpoint);
